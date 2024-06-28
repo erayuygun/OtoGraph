@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>Araba Satın Al</title>
+    <style>
+        /* Genel stil tanımlamaları */
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', Arial, Helvetica, sans-serif;
+            overflow: hidden;
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+        }
+
+        /* Arka plan stil tanımlamaları */
+        .background {
+            background-image: url('https://cdn.cetas.com.tr/Delivery/Public/Image/-1x-1/shutterstock_94199545_5698113989.jpg');
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 4px #000000;
+        }
+
+        /* Başlık stil tanımlamaları */
+        .background h1 {
+            font-size: 4em;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* İçerik kutusu stil tanımlamaları */
+        .content {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* İçerik başlık stil tanımlamaları */
+        .content h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        /* İçerik paragraf stil tanımlamaları */
+        .content p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        /* Başlat düğmesi stil tanımlamaları */
+        #loadButton {
+            font-size: 2em;
+            padding: 20px 40px;
+            cursor: pointer;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #loadButton:hover {
+            background-color: #fb8c00;
+        }
+
+        /* Kontrol kutusu stil tanımlamaları */
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            display: none;
+        }
+
+        .controls .group-label {
+            padding: 9px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            font-size: 1em;
+        }
+
+        .controls .group-label:hover {
+            opacity: 0.8;
+        }
+
+        /* Grup seçme kutusu stil tanımlamaları */
+        #groupingSelect {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #333;
+            color: #f5f5f5;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        #groupingSelect option {
+            background-color: #333;
+            color: #f5f5f5;
+        }
+
+        /* Modal pencere stil tanımlamaları */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            background-color: #2c2c2c;
+            color: #f5f5f5;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .modal-header img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .modal-body p {
+            margin: 5px 0;
+        }
+
+        .modal-body a {
+            color: #ff9800;
+        }
+
+        .modal-body a:hover {
+            color: #fb8c00;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Arka plan ve içerik bölümü -->
+    <div class="background">
+        <h1>OtoGraph</h1>
+        <div class="content">
+            <h2>Araba mı Satın Almak İstiyorsunuz?</h2>
+            <p>Sitemiz tam size göre! Size uygun segmentteki en iyi markaları ve modelleri keşfedin.</p>
+            <button id="loadButton">Hemen Başlayın</button>
+        </div>
+    </div>
+    
+    <!-- Graf ve kontrol kutuları -->
+    <div id="graphContainer" style="position: relative; height: 100%; width: 100%;">
+        <svg width="100%" height="100%"></svg>
+        <div class="controls"></div>
+        <select id="groupingSelect">
+            <option value="brand">Markaya Göre</option>
+            <option value="segment">Segmente Göre</option>
+        </select>
+    </div>
+
+    <!-- Modal pencere -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img id="carLogo" src="" alt="Car Logo">
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalText"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gerekli kütüphanelerin yüklenmesi -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
+    <script>
+        // Sabit ve değişkenlerin tanımlanması
+        const CAR_CSV_HEADER = 'Brand,Model,Website,Price,Fuel Consumption (City),Fuel Consumption (Highway),Segment';
+        const MINIMUM_BRAND_SIZE = 1;
+        const CSV_PATH = 'expanded_car_data_all_v2.csv';
+        const nodes = [];
+        const links = [];
+        const groupCountMap = new Map();
+        const groupColors = new Map();
+
+        // Araç logolarının tanımlanması
+        const carLogos = {
+            "Toyota": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Toyota_EU.svg/1280px-Toyota_EU.svg.png",
+            "Volvo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Volvo-Iron-Mark-Black.svg/1200px-Volvo-Iron-Mark-Black.svg.png",
+            "BMW": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/BMW.svg/2048px-BMW.svg.png",
+            "Tesla": "https://www.svgrepo.com/show/342292/tesla.svg",
+            "Kia": "https://www.svgrepo.com/show/330787/kia.svg",
+            "Fiat": "https://www.svgrepo.com/show/446871/fiat.svg",
+            "Volkswagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/1024px-Volkswagen_logo_2019.svg.png",
+            "Opel": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Opel-Logo_2017.png",
+            "Hyundai": "https://www.svgrepo.com/show/306214/hyundai.svg",
+            "Renault": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Renault_2021_Text.svg/877px-Renault_2021_Text.svg.png",
+            "Dacia": "https://upload.wikimedia.org/wikipedia/commons/4/41/Dacia-Logo-2021.svg",
+            "Honda": "https://www.svgrepo.com/show/306198/honda.svg",
+            "Ford": "https://i.pinimg.com/736x/a7/64/28/a76428e744bdc2422377dc23378c57c5.jpg",
+            "Audi": "https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg",
+            "Mercedes": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Mercedes-Logo.svg/567px-Mercedes-Logo.svg.png",
+            "Citroen": "https://seeklogo.com/images/C/citroen-new-2022-logo-B8E6FFA65E-seeklogo.com.png",
+            "Chevrolet": "https://www.svgrepo.com/show/330140/chevrolet.svg",
+            "Land Rover": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/LandRover.svg/1280px-LandRover.svg.png",
+            "Jeep": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Jeep_logo.svg/2560px-Jeep_logo.svg.png",
+            "Seat": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/SEAT_Logo_from_2017.svg/302px-SEAT_Logo_from_2017.svg.png",
+            "Skoda": "https://www.skodaperth.com.au/wp-content/uploads/2023/09/skoda_logo_v2_squared-1170x1170-1.webp"
+        };
+
+        // CSV dosyasını yükleme ve grafik oluşturma fonksiyonu
+        function loadCSVAndRender() {
+            const grouping = document.getElementById('groupingSelect').value;
+
+            $.ajax({
+                type: "GET",
+                url: CSV_PATH,
+                dataType: "text",
+                success: function(data) {
+                    const result = data.substring(data.search(CAR_CSV_HEADER));
+                    const cars = $.csv.toObjects(result);
+
+                    nodes.length = 0;
+                    links.length = 0;
+                    groupCountMap.clear();
+                    groupColors.clear();
+
+                    const color = d3.scaleOrdinal(d3.schemeCategory20);
+                    let colorIndex = 0;
+
+                    // Ana "Arabalar" düğümü
+                    nodes.push({
+                        "group": "Arabalar",
+                        "name": "Arabalar",
+                        "isMain": true
+                    });
+
+                    // Grupları marka veya segmente göre oluşturma
+                    const groups = new Map();
+
+                    for (const car of cars) {
+                        const groupKey = car[grouping.charAt(0).toUpperCase() + grouping.slice(1)];
+                        if (!groups.has(groupKey)) {
+                            const groupName = groupKey || "Unknown";
+                            groups.set(groupKey, {
+                                "group": groupName,
+                                "name": groupName,
+                                "isMain": true
+                            });
+                            nodes.push(groups.get(groupKey));
+                            links.push({
+                                "source": "Arabalar",
+                                "target": groupName
+                            });
+                            if (!groupColors.has(groupName)) {
+                                groupColors.set(groupName, color(colorIndex++));
+                            }
+                        }
+                        // Gruplardaki araç sayısını artırma
+                        groupCountMap.set(groupKey, (groupCountMap.get(groupKey) || 0) + 1);
+                    }
+
+                    // Araç düğümlerini ve bağlantılarını ekleme
+                    for (const car of cars) {
+                        const groupKey = car[grouping.charAt(0).toUpperCase() + grouping.slice(1)];
+                        const groupName = groupKey || "Unknown";
+                        const carName = grouping === "brand" ? car["Model"] : `${car["Brand"]} ${car["Model"]}`;
+                        
+                        nodes.push({
+                            "group": groupName,
+                            "name": carName,
+                            "website": car["Website"],
+                            "price": car["Price"],
+                            "fuelCity": car["Fuel Consumption (City)"],
+                            "fuelHighway": car["Fuel Consumption (Highway)"],
+                            "segment": car["Segment"]
+                        });
+
+                        links.push({
+                            "source": groupName,
+                            "target": carName
+                        });
+                    }
+
+                    const graph = {
+                        "nodes": nodes,
+                        "links": links
+                    };
+
+                    render(graph);
+                    updateControls(grouping, groups);
+                },
+                error: function() {
+                    alert('CSV dosyası yüklenemedi.');
+                }
+            });
+        }
+
+        // "Hemen Başlayın" butonuna tıklama olayını dinleme
+        document.getElementById('loadButton').addEventListener('click', function() {
+            loadCSVAndRender();
+            document.querySelector('.background').style.display = 'none';
+            document.querySelector('.controls').style.display = 'flex';
+            document.getElementById('groupingSelect').style.display = 'block';
+        });
+
+        // Grup seçme kutusunda değişiklik olayını dinleme
+        document.getElementById('groupingSelect').addEventListener('change', loadCSVAndRender);
+
+        let simulation;
+
+        // Graf oluşturma fonksiyonu
+        function render(graph) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            const svg = d3.select("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", zoomed));
+
+            svg.selectAll("*").remove();
+
+            const container = svg.append("g");
+
+            simulation = d3.forceSimulation(graph.nodes)
+                .force("link", d3.forceLink(graph.links).id(d => d.name).distance(100))
+                .force("charge", d3.forceManyBody().strength(-300))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collision", d3.forceCollide().radius(60));
+
+            const link = container.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("stroke", "#999")
+                .attr("stroke-opacity", 0.6)
+                .attr("stroke-width", "1.5px");
+
+            const node = container.append("g")
+                .attr("class", "nodes")
+                .selectAll("g")
+                .data(graph.nodes)
+                .enter().append("g")
+                .on("click", function(d) {
+                    nodeClicked(d);
+                })
+                .on("contextmenu", function(d) {
+                    d3.event.preventDefault();
+                    showModal(d);
+                });
+
+            const circles = node.append("circle")
+                .attr("r", d => d.isMain ? 20 : 15)
+                .attr("fill", d => groupColors.get(d.group))
+                .attr("stroke", "#fff")
+                .attr("stroke-width", "1.5px")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            const labels = node.append("text")
+                .text(d => d.name)
+                .attr('x', 20)
+                .attr('y', 5)
+                .attr('fill', '#ffffff');
+
+            node.append("title")
+                .text(d => d.group);
+
+            // Tüm markalara logo eklemek için
+            node.filter(d => carLogos[d.name])
+                .append("image")
+                .attr("xlink:href", d => carLogos[d.name])
+                .attr("x", -15)
+                .attr("y", -15)
+                .attr("width", 30)
+                .attr("height", 30)
+                .attr("pointer-events", "none");
+
+            simulation.on("tick", ticked);
+
+            function ticked() {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("transform", d => `translate(${d.x},${d.y})`);
+            }
+
+            function zoomed() {
+                container.attr("transform", d3.event.transform);
+            }
+        }
+
+        // Kontrol kutularını güncelleme fonksiyonu
+        function updateControls(grouping, groups) {
+            const controls = document.querySelector('.controls');
+            controls.innerHTML = '';
+
+            groups.forEach((value, key) => {
+                const label = document.createElement('div');
+                label.classList.add('group-label');
+                label.textContent = key;
+                label.style.backgroundColor = groupColors.get(key);
+                label.addEventListener('click', () => alert(`${key} grubunda ${groupCountMap.get(key)} araç bulunmaktadır.`));
+                controls.appendChild(label);
+            });
+        }
+
+        // Düğüm sürüklemeye başlama
+        function dragstarted(d) {
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        // Düğüm sürükleme
+        function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+
+        // Düğüm sürüklemeyi bırakma
+        function dragended(d) {
+            d.fx = null;
+            d.fy = null;
+        }
+
+        // Düğüm tıklama olayını işleme
+        function nodeClicked(d) {
+            if (d.website) window.open(d.website, "_blank");
+        }
+
+        // Modal pencereyi gösterme
+        function showModal(d) {
+            const modal = document.getElementById("myModal");
+            const modalText = document.getElementById("modalText");
+            const carLogo = document.getElementById("carLogo");
+            carLogo.src = carLogos[d.name] || "";
+            modalText.innerHTML = `
+                <p><strong>Group:</strong> ${d.group}</p>
+                <p><strong>Model:</strong> ${d.name}</p>
+                <p><strong>Website:</strong> <a href="${d.website}" target="_blank">${d.website}</a></p>
+                <p><strong>Price:</strong> ${d.price}</p>
+                <p><strong>Fuel Consumption (City):</strong> ${d.fuelCity}</p>
+                <p><strong>Fuel Consumption (Highway):</strong> ${d.fuelHighway}</p>
+                <p><strong>Segment:</strong> ${d.segment}</p>
+            `;
+            modal.style.display = "block";
+        }
+
+        // Modal pencereyi gizleme
+        function hideModal() {
+            const modal = document.getElementById("myModal");
+            modal.style.display = "none";
+        }
+
+        const span = document.getElementsByClassName("close")[0];
+
+        span.onclick = function() {
+            hideModal();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("myModal");
+            if (event.target == modal) {
+                hideModal();
+            }
+        }
+    </script>
+</body>
+</html>
