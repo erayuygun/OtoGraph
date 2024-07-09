@@ -27,7 +27,7 @@ OtoGraph, kullanıcıların çeşitli markalardaki ve segmentlerdeki araçları 
 ## Kullanım
 1. Ana sayfada bulunan "Hemen Başlayın" butonuna tıklayın.
 2. Araçları markaya veya segmente göre gruplamak için sağ üst köşedeki seçim kutusunu kullanın.
-3. Gruplar arasındaki ilişkiyi graf yapısı sayesinde renkler ve logolar sayesinde rahatlıkla görebilrisiniz.
+3. Gruplar arasındaki ilişkiyi graf yapısı sayesinde renkler ve logolar sayesinde rahatlıkla görebilirisiniz.
 4. Sağ tıkladığınızda açılan modal pencerede araç hakkında detaylı bilgileri görüntüleyin.
 
 ## Yapı
