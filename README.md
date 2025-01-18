@@ -35,9 +35,3 @@ index.html: Ana HTML dosyası.
 style.css: Stil tanımlamaları.
 script.js: JavaScript fonksiyonları ve D3.js kodları.
 expanded_car_data_all_v2.csv: Araç verilerini içeren CSV dosyası.
-
-## Katkıda Bulunma
-Katkıda bulunmak isterseniz, lütfen bir pull request gönderin veya bir sorun (issue) açın.
-
-## İletişim
-Herhangi bir sorunuz veya geri bildiriminiz varsa, lütfen erayuygun35@gmail.com adresine e-posta gönderin.
